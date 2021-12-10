@@ -1,13 +1,8 @@
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request
 from youtube_transcript_api import YouTubeTranscriptApi
 import json
 from flask_cors import CORS
 from transformers import pipeline
-
-video_link = "https://www.youtube.com/watch?v=FVsI1AgyxGM&t=128s"
-
-
-# video_id = video_link.split("=")[1]
 
 
 def converter(transcript):
@@ -15,14 +10,13 @@ def converter(transcript):
     for x in transcript:
         text_string = json.dumps(x)
         text_dict = json.loads(text_string)
-        # print(text_dict["text"])
+   
         result += (text_dict["text"])
         result += " "
 
     return result
 
 
-# print(summarizer(original_text, max_length=130, min_length=30, do_sample=False))
 
 def summarizeAll(original_text):
     summarizer = pipeline("summarization")
@@ -39,17 +33,13 @@ def summarizeAll(original_text):
             end = lenofScript
 
         text = original_text[start:end]
-        # print("eachLine-text:",text)
-
-        # print(summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text'])
+       
         summary_text += summarizer(text, max_length=130,
                                    min_length=30, do_sample=False)[0]['summary_text']
 
     return summary_text
 
 
-# summary_text = summarization(original_text)[0]['summary_text']
-# print("Summary:", summary_text)
 
 
 app = Flask(__name__)
@@ -68,8 +58,7 @@ def index():
     print("Succesfull!!! HTTP code 200")
     requestUrl = request.url
     print(requestUrl)
-    # video = requestUrl.rfind("=")
-    # video_id = requestUrl[video+1:]
+   
 
     video = requestUrl.find("=")
     print(video)
@@ -85,13 +74,10 @@ def index():
     else:
         video_id = video_first[video_1+1:]
 
-    #video_id = requestUrl.rsplit("=")[1]
-    print("video id is:")
-    print(video_id)
+    
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
 
     # using pipeline API for summarization task
-    # summarizer = pipeline("summarization")
     script = converter(transcript)
 
     summary_text = summarizeAll(script)
@@ -109,4 +95,4 @@ if __name__ == "__main__":
     app.run(debug=True, port=8000)
 
 
-# def converter_to_summary(video_id):
+
