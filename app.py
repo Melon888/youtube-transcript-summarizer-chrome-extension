@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from youtube_transcript_api import YouTubeTranscriptApi
 import json
 from flask_cors import CORS
@@ -10,19 +10,17 @@ def converter(transcript):
     for x in transcript:
         text_string = json.dumps(x)
         text_dict = json.loads(text_string)
-   
+
         result += (text_dict["text"])
         result += " "
 
     return result
 
 
-
 def summarizeAll(original_text):
     summarizer = pipeline("summarization")
     lenofScript = len(original_text)
     length = int(len(original_text)/1000)
-
     summary_text = ""
     text = ""
     for eachLine in range(0, length+1):
@@ -33,13 +31,11 @@ def summarizeAll(original_text):
             end = lenofScript
 
         text = original_text[start:end]
-       
+
         summary_text += summarizer(text, max_length=130,
                                    min_length=30, do_sample=False)[0]['summary_text']
 
     return summary_text
-
-
 
 
 app = Flask(__name__)
@@ -53,12 +49,11 @@ cors = CORS(app, resources={
 
 @app.route('/', methods=['Post', 'GET'])
 def index():
-    if False:
-        return jsonify({"result": "failure", "error": "401", "message": "unauthorized"}), 401
+    # if False:
+    #     return jsonify({"result": "failure", "error": "401", "message": "unauthorized"}), 401
     print("Succesfull!!! HTTP code 200")
     requestUrl = request.url
     print(requestUrl)
-   
 
     video = requestUrl.find("=")
     print(video)
@@ -74,7 +69,6 @@ def index():
     else:
         video_id = video_first[video_1+1:]
 
-    
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
 
     # using pipeline API for summarization task
@@ -83,6 +77,7 @@ def index():
     summary_text = summarizeAll(script)
 
     print("transcript is ready!!!!!")
+    print(summary_text)
     return summary_text
 
 
@@ -93,6 +88,3 @@ def get_url():
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
-
-
-
